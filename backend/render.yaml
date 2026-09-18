@@ -1,0 +1,19 @@
+# Render.com Blueprint dosyası.
+# Render Dashboard'da "New +" -> "Blueprint" ile bu depoyu bağlarsanız
+# aşağıdaki servis otomatik olarak ayarlarıyla birlikte oluşturulur.
+# Manuel kurulum için README_DEPLOY.md dosyasındaki adımları izleyebilirsiniz.
+
+services:
+  - type: web
+    name: dualdesk-pc-signaling
+    runtime: python
+    plan: free
+    region: frankfurt          # size en yakın bölgeyi seçebilirsiniz
+    branch: main
+    rootDir: backend
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python server.py"
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9

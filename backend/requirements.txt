@@ -1,0 +1,2 @@
+# DualDesk PC - Backend (Sinyalleşme Sunucusu) Bağımlılıkları
+websockets>=13.0
