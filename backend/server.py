@@ -143,6 +143,11 @@ async def handle_connect_request(client_id: str, requester: dict, msg: dict) -> 
     target_id = msg.get("target_id")
     target_password = msg.get("target_password")
     mode = msg.get("mode", "screen")  # "screen" ya da "call"
+    # DualDesk Mobil entegrasyonu: "CONTROL" | "VIEW_ONLY". Bu sunucu yalnızca
+    # broker'dır - değeri doğrulamaz/değiştirmez, olduğu gibi hedefe iletir.
+    # Asıl doğrulama HOST tarafında (screen_share.py yaması) yapılır; bu alan
+    # sadece iki istemcinin AYNI yetkiyi görmesini garanti eder.
+    permission = msg.get("permission", "CONTROL")
 
     target = CLIENTS.get(target_id)
 
@@ -169,14 +174,16 @@ async def handle_connect_request(client_id: str, requester: dict, msg: dict) -> 
         "from_id": client_id,
         "target_id": target_id,
         "mode": mode,
+        "permission": permission,
     }
 
-    logger.info(f"Bağlantı isteği: {client_id} -> {target_id} ({mode})")
+    logger.info(f"Bağlantı isteği: {client_id} -> {target_id} ({mode}, {permission})")
 
     await target["ws"].send(json.dumps({
         "type": "incoming_request",
         "from_id": client_id,
         "mode": mode,
+        "permission": permission,
         "request_id": request_id,
     }))
 
@@ -210,10 +217,13 @@ async def handle_connect_response(msg: dict) -> None:
 
     logger.info(f"Bağlantı kabul edildi: {req} -> port {port}")
 
+    permission = req.get("permission", "CONTROL")
+
     await target["ws"].send(json.dumps({
         "type": "start_listener",
         "port": port,
         "mode": req["mode"],
+        "permission": permission,
     }))
 
     await requester["ws"].send(json.dumps({
@@ -222,6 +232,7 @@ async def handle_connect_response(msg: dict) -> None:
         "target_local_ip": msg.get("local_ip"),
         "port": port,
         "mode": req["mode"],
+        "permission": permission,
     }))
 
 
