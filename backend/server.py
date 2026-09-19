@@ -58,7 +58,19 @@ PENDING_REQUESTS: dict[str, dict] = {}
 async def process_request(connection, request):
     """WebSocket el sıkışması olmayan düz HTTP isteklerine (örn. Render'ın
     sağlık kontrolü veya tarayıcıdan '/' ziyareti) 200 OK döndürür.
-    WebSocket upgrade isteği ise None döndürülerek normal akışa bırakılır."""
+    WebSocket upgrade isteği ise None döndürülerek normal akışa bırakılır.
+
+    Ayrıca, Render gibi ters proxy kullanan platformlar TLS'i kendi
+    kenarında sonlandırdığı için connection.remote_address, istemcinin
+    gerçek genel IP'si DEĞİL, platformun iç proxy IP'sidir. Gerçek istemci
+    IP'si bu platformlarca 'X-Forwarded-For' header'ında iletilir (ilk
+    değer). Burada, henüz orijinal HTTP isteğine erişimimiz varken bu
+    değeri okuyup connection nesnesine ekliyoruz; handler() içinde bu
+    header'a artık erişimimiz olmuyor, bu yüzden burada yakalamak gerekiyor.
+    """
+    forwarded = request.headers.get("X-Forwarded-For")
+    connection.real_client_ip = forwarded.split(",")[0].strip() if forwarded else None
+
     if request.headers.get("Upgrade", "").lower() != "websocket":
         return connection.respond(
             HTTPStatus.OK,
@@ -67,13 +79,22 @@ async def process_request(connection, request):
     return None
 
 
+def _extract_client_ip(websocket) -> str:
+    """process_request'te yakalanan gerçek istemci IP'sini (varsa) döndürür,
+    yoksa (yerel/proxy'siz çalışırken) remote_address'e düşer."""
+    real_ip = getattr(websocket, "real_client_ip", None)
+    if real_ip:
+        return real_ip
+    return websocket.remote_address[0] if websocket.remote_address else "0.0.0.0"
+
+
 async def handler(websocket):
     client_id = generate_id()
     while client_id in CLIENTS:
         client_id = generate_id()
 
     password = generate_password()
-    ip = websocket.remote_address[0] if websocket.remote_address else "0.0.0.0"
+    ip = _extract_client_ip(websocket)
 
     CLIENTS[client_id] = {"password": password, "ws": websocket, "ip": ip}
     logger.info(f"Yeni istemci bağlandı: {client_id} ({ip})")
@@ -198,6 +219,7 @@ async def handle_connect_response(msg: dict) -> None:
     await requester["ws"].send(json.dumps({
         "type": "connect_accepted",
         "target_ip": target["ip"],
+        "target_local_ip": msg.get("local_ip"),
         "port": port,
         "mode": req["mode"],
     }))
