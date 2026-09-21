@@ -68,7 +68,7 @@ logger = logging.getLogger("DualDeskServer")
 HOST = "0.0.0.0"
 PORT = int(os.environ.get("PORT", 8765))  # Render bu değeri otomatik atar
 
-MAX_ROOM_MEMBERS = 4
+MAX_ROOM_MEMBERS = 8
 ID_BYTES = 9  # generate_id() her zaman 9 haneli döner - binary framing bu sabite dayanır.
 
 # client_id -> {"password": str, "ws": WebSocketServerProtocol, "ip": str}
