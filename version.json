@@ -2,6 +2,7 @@
   "version": "1.0.1",
   "notes_tr": "Performans iyileştirmeleri, hata düzeltmeleri ve daha kararlı kullanım deneyimi.",
   "notes_en": "Performance improvements, bug fixes, and a more stable user experience.",
-  "url_x64": "github.com/aykutsen1987/dualdeskpc/releases/latest",
-  "url_x86": "github.com/aykutsen1987/dualdeskpc/releases/latest"
+  "url_x64": "github.com/aykutsen1987/dualdeskpc/releases/download/v1.0.1/DualDeskPC_Setup_x64.exe",
+  "url_x86": "github.com/aykutsen1987/dualdeskpc/releases/download/v1.0.1/DualDeskPC_Setup_x86.exe"
 }
+/* url_x86": "github.com/aykutsen1987/dualdeskpc/releases/latest */
