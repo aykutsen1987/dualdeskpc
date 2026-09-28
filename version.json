@@ -4,5 +4,5 @@
   "notes_en": "Performance improvements, bug fixes, and a more stable user experience.",
   "url_x64": "github.com/aykutsen1987/dualdeskpc/releases/download/v1.0.1/DualDeskPC_Setup_x64.exe",
   "url_x86": "github.com/aykutsen1987/dualdeskpc/releases/download/v1.0.1/DualDeskPC_Setup_x86.exe"
-  // "github.com/aykutsen1987/dualdeskpc/releases/latest"
+  "latest_url": "github.com/aykutsen1987/dualdeskpc/releases/latest"
 }
